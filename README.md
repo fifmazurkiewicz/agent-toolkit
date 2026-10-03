@@ -43,6 +43,8 @@ my-project/
 
 The toolkit is the source for general rules and reusable skills, not product decisions. It includes workflow, simplification, FastAPI, UI quality, accessibility, performance, SEO, diagram, and architecture skills. Profiles choose sensible defaults, while the manifest remains the desired state for an individual project.
 
+For a new product decision, use the happy path: `idea-validation → brainstorming → production-product-requirements → writing-plans → implementation/review`. Start at the earliest stage whose output is missing: `idea-validation` tests the problem and evidence, `brainstorming` shapes the solution, and `production-product-requirements` creates the production-ready product contract. Small, already-decided maintenance work can begin later in the sequence.
+
 Graft is the only mandatory shared MCP. `install` configures it for every selected client with `npx -y @nanonets/graft mcp`, without credentials or runtime installation. Existing JSON MCP servers are preserved. Codex receives only a marked managed block; an unmarked, conflicting Graft table is rejected rather than overwritten. The standard requires a focused `rg` fallback when Graft cannot run.
 
 ## Discovery contract

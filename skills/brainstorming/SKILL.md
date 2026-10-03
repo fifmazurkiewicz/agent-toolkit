@@ -35,6 +35,27 @@ When the request already supplies the purpose and constraints, reflect
 that understanding instead of asking the same questions again. Keep the
 note concise; its accuracy and the opportunity to correct it matter.
 
+## Product shaping after validation
+
+When `idea-validation` has produced findings, treat its problem, evidence,
+assumptions, and validation risks as input rather than repeating discovery.
+Shape the accepted opportunity into:
+
+1. Business flow and user flow.
+2. Solution alternatives and their trade-offs.
+3. Architecture, integrations, and relevant project constraints.
+4. Scope, non-scope, dependencies, and delivery risks.
+
+Do not repeat market evidence, user-pain research, or validation experiments.
+When this shaping is approved, hand the product contract to
+`production-product-requirements`; it turns the decisions into a PRD without
+creating a file-by-file technical plan.
+
+For “what do we do next?”, start at the earliest missing stage:
+`idea-validation -> brainstorming -> production-product-requirements ->
+writing-plans -> implementation/review`. Already-decided, narrow maintenance
+work may start later in the sequence.
+
 <HARD-GATE>
 Before taking any implementation action, including invoking an
 implementation skill, writing product code, scaffolding, installing

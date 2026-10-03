@@ -108,6 +108,21 @@ def test_archify_is_vendored_for_all_clients(tmp_path: Path):
     assert not check(tmp_path)
 
 
+def test_product_workflow_skills_are_selected_and_installed_by_profiles(tmp_path: Path):
+    for profile in ("web", "backend"):
+        root = tmp_path / profile
+        init(root, profile)
+        config = yaml.safe_load((root / ".agent/manifest.yaml").read_text())
+        skills = config["skills"]
+        assert skills.index("brainstorming") < skills.index("idea-validation")
+        assert skills.index("idea-validation") < skills.index("production-product-requirements")
+        assert skills.index("production-product-requirements") < skills.index("writing-plans")
+        install(root)
+        for directory in (".agents/skills", ".claude/skills"):
+            assert (root / directory / "idea-validation/SKILL.md").is_file()
+            assert (root / directory / "production-product-requirements/SKILL.md").is_file()
+
+
 def test_install_generates_graft_for_all_clients_and_preserves_json_servers(tmp_path: Path):
     cursor = tmp_path / ".cursor/mcp.json"
     cursor.parent.mkdir()
