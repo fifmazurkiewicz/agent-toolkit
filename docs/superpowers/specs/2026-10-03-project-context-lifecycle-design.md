@@ -26,7 +26,7 @@ is automatically selected by the existing `web` and `backend` profiles.
 - A `project-context-lifecycle` skill defining the `.agent/context/` layout,
   active-change selection, lifecycle transitions, and archiving rules.
 - Separate skills for `problem-framing`, `technical-research`, `plan-review`,
-  `implementation`, `tdd`, and `implementation-review`.
+  `implementation`, `tdd`, `implementation-review`, and `goal-implement`.
 - A standard set of change-local artifacts: `frame.md`, `research.md`,
   `decisions.md`, `plan.md`, `progress.md`, `evidence.md`, and `reviews/`.
 - Graft as the durable knowledge store for reusable project lessons and
@@ -40,6 +40,8 @@ is automatically selected by the existing `web` and `backend` profiles.
 - Automatic context creation, automatic Graft writes, or an append-only
   `lessons.md` file.
 - Changing client adapters or the existing MCP configuration.
+- CI review automation, npm packaging, AWS CodeArtifact, Terraform, and
+  GitHub Actions publication pipelines.
 
 ## Architecture
 
@@ -102,6 +104,13 @@ capability but does not create a second, divergent source of truth.
   `reviews/implementation-review.md`, requires evidence for accepted criteria,
   and permits archival only when blockers are resolved or explicitly accepted
   by the human owner.
+- **goal-implement** is the non-interactive counterpart to `implementation`.
+  It may execute only an approved plan whose automated and manual steps are
+  identified. Before starting, it records the allowed file scope, network and
+  secret boundaries, verification commands, and a maximum of two repair
+  attempts per quality gate. It commits only after the gate passes, returns a
+  human checklist for manual work, and stops conservatively on structural
+  plan/repository drift or an exhausted repair limit.
 
 All skills preserve the existing safety, approval, and proportionate
 verification rules in `AGENT_STANDARD.md`. They do not override an
@@ -113,7 +122,10 @@ Both profiles will install the lifecycle skill before the workflow stages.
 `problem-framing` and `technical-research` occur after the existing
 idea-validation/brainstorming product-shaping work and before
 production-product-requirements and writing-plans. `plan-review` follows
-writing-plans; implementation, TDD, and implementation review follow it.
+writing-plans; implementation, TDD, implementation review, and optional
+goal-implement follow it. `goal-implement` does not replace interactive
+implementation and never grants permissions that the current environment or
+the approved plan does not grant.
 
 The authoring files in `skills/`, `profiles/`, and `AGENT_STANDARD.md` are
 copied byte-for-byte to `src/agent_toolkit/data/`. The existing manifest and
@@ -122,7 +134,7 @@ code changes.
 
 ## Verification
 
-Tests will prove both profiles select the lifecycle and all six stages in
+Tests will prove both profiles select the lifecycle and all seven stages in
 order, and that installation copies the lifecycle plus every stage to the
 canonical and Claude runtime directories. Existing parity, drift, and
 read-only `check` tests remain the compatibility safety net. The complete
