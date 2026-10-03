@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import yaml
@@ -105,3 +106,33 @@ def test_archify_is_vendored_for_all_clients(tmp_path: Path):
         assert (tmp_path / folder / "archify/bin/archify.mjs").is_file()
         assert (tmp_path / folder / "archify/LICENSE").is_file()
     assert not check(tmp_path)
+
+
+def test_install_generates_graft_for_all_clients_and_preserves_json_servers(tmp_path: Path):
+    cursor = tmp_path / ".cursor/mcp.json"
+    cursor.parent.mkdir()
+    cursor.write_text(json.dumps({"mcpServers": {"local": {"command": "local-mcp"}}}), encoding="utf-8")
+    init(tmp_path)
+    install(tmp_path)
+    cursor_servers = json.loads(cursor.read_text())["mcpServers"]
+    claude_servers = json.loads((tmp_path / ".mcp.json").read_text())["mcpServers"]
+    codex = (tmp_path / ".codex/config.toml").read_text()
+    assert cursor_servers["local"] == {"command": "local-mcp"}
+    assert cursor_servers["graft"]["args"] == ["-y", "@nanonets/graft", "mcp"]
+    assert claude_servers["graft"] == cursor_servers["graft"]
+    assert "agent-toolkit:graft start" in codex
+    assert yaml.safe_load((tmp_path / ".agent/lock.yaml").read_text())["mcp_servers"] == ["graft"]
+    assert not check(tmp_path)
+
+
+def test_check_detects_graft_drift_without_writing(tmp_path: Path):
+    init(tmp_path, "backend")
+    install(tmp_path)
+    cursor = tmp_path / ".cursor/mcp.json"
+    value = json.loads(cursor.read_text())
+    value["mcpServers"]["graft"]["command"] = "wrong"
+    cursor.write_text(json.dumps(value), encoding="utf-8")
+    before = {p.relative_to(tmp_path): p.read_bytes() for p in tmp_path.rglob("*") if p.is_file()}
+    assert any("Graft MCP configuration" in error for error in check(tmp_path))
+    after = {p.relative_to(tmp_path): p.read_bytes() for p in tmp_path.rglob("*") if p.is_file()}
+    assert before == after

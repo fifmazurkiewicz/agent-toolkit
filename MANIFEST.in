@@ -1,1 +1,2 @@
 recursive-include src/agent_toolkit/data/skills/archify *
+recursive-include src/agent_toolkit/data/skills *

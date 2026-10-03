@@ -11,7 +11,7 @@ from pathlib import Path
 import yaml
 
 from . import __version__
-from .adapters import claude, codex, cursor
+from .adapters import claude, codex, cursor, graft
 
 START = "<!-- agent-toolkit:standard v1 start -->"
 END = "<!-- agent-toolkit:standard end -->"
@@ -78,7 +78,13 @@ def skill_files(base: Path, skill: str) -> list[Path]:
 
 
 def expected_lock(root: Path, config: dict) -> dict:
-    result = {"toolkit_version": __version__, "profile": config["profile"], "clients": config["clients"], "skills": {}}
+    result = {
+        "toolkit_version": __version__,
+        "profile": config["profile"],
+        "clients": config["clients"],
+        "mcp_servers": ["graft"],
+        "skills": {},
+    }
     for skill in config["skills"]:
         result["skills"][skill] = {
             str(p.relative_to(root / ".agents/skills" / skill)): digest(p)
@@ -118,6 +124,28 @@ def standard_block(root: Path) -> str:
     return block(current, START, END, data_file("AGENT_STANDARD.md").read_text(encoding="utf-8"))
 
 
+def mcp_text(path: Path, renderer) -> str:
+    current = path.read_text(encoding="utf-8") if path.exists() else ""
+    try:
+        return renderer(current)
+    except graft.GraftConfigError as exc:
+        raise ToolkitError(f"{path}: {exc}") from exc
+
+
+def expected_mcp_files(root: Path, clients: list[str]) -> dict[Path, str]:
+    result: dict[Path, str] = {}
+    if "cursor" in clients:
+        path = graft.cursor_path(root)
+        result[path] = mcp_text(path, graft.json_with_graft)
+    if "claude" in clients:
+        path = graft.claude_path(root)
+        result[path] = mcp_text(path, graft.json_with_graft)
+    if "codex" in clients:
+        path = graft.codex_path(root)
+        result[path] = mcp_text(path, graft.codex_with_graft)
+    return result
+
+
 def init(root: Path, profile: str = "web") -> None:
     if profile not in {"web", "backend"}:
         raise ToolkitError("Profile must be web or backend")
@@ -134,6 +162,7 @@ def install(root: Path) -> None:
     config = manifest(root)
     # Validate all managed blocks before writing anything.
     agent_text = standard_block(root)
+    mcp_files = expected_mcp_files(root, config["clients"])
     claude_path = root / "CLAUDE.md"
     claude_text = None
     if "claude" in config["clients"]:
@@ -169,6 +198,9 @@ def install(root: Path) -> None:
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(original, dest)
     (root / "AGENTS.md").write_text(agent_text, encoding="utf-8")
+    for path, text in mcp_files.items():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
     if claude_text is not None and ("claude" in config["clients"] or claude_path.exists()):
         claude_path.write_text(claude_text, encoding="utf-8")
     if "claude" in config["clients"]:
@@ -229,8 +261,20 @@ def check(root: Path) -> list[str]:
     locked_skills = actual_lock.get("skills")
     if not isinstance(locked_skills, dict):
         return errors + ["Malformed lock skills mapping"]
-    if actual_lock.get("toolkit_version") != __version__ or actual_lock.get("profile") != config["profile"] or actual_lock.get("clients") != config["clients"] or set(locked_skills) != set(config["skills"]):
+    if actual_lock.get("toolkit_version") != __version__ or actual_lock.get("profile") != config["profile"] or actual_lock.get("clients") != config["clients"] or actual_lock.get("mcp_servers") != ["graft"] or set(locked_skills) != set(config["skills"]):
         errors.append("Manifest/lock metadata differs")
+    try:
+        mcp_files = expected_mcp_files(root, config["clients"])
+    except ToolkitError as exc:
+        errors.append(f"Graft MCP configuration: {exc}")
+        mcp_files = {}
+    for path, expected in mcp_files.items():
+        try:
+            actual = path.read_text(encoding="utf-8")
+            if actual != expected:
+                errors.append(f"Graft MCP configuration differs: {path.relative_to(root)}")
+        except (OSError, ToolkitError) as exc:
+            errors.append(f"Graft MCP configuration: {exc}")
     for old_skill in set(locked_skills) - set(config["skills"]):
         errors.append(f"Obsolete managed skill: {old_skill}")
     for skill in config["skills"]:

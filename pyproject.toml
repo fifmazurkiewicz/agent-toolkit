@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-toolkit"
-version = "1.1.0"
+version = "1.2.0"
 description = "Small, vendored agent standards and skills for Cursor, Codex and Claude Code"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -23,7 +23,7 @@ package-dir = {"" = "src"}
 where = ["src"]
 
 [tool.setuptools.package-data]
-agent_toolkit = ["data/AGENT_STANDARD.md", "data/profiles/*.yaml", "data/skills/*/SKILL.md", "data/skills/archify/**/*"]
+agent_toolkit = ["data/AGENT_STANDARD.md", "data/profiles/*.yaml", "data/skills/**/*"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

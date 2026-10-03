@@ -13,8 +13,9 @@
     { "id": "install", "type": "backend", "label": "install / update", "sublabel": "Python CLI", "pos": [295, 260], "size": [170, 64] },
     { "id": "instructions", "type": "database", "label": "Project instructions", "sublabel": "AGENTS.md + CLAUDE.md", "pos": [575, 70], "size": [200, 70] },
     { "id": "skills", "type": "database", "label": "Runtime skills", "sublabel": ".agents + .claude", "pos": [575, 240], "size": [200, 70] },
-    { "id": "lock", "type": "database", "label": "Lockfile", "sublabel": "version + SHA-256", "pos": [575, 410], "size": [200, 70] },
-    { "id": "check", "type": "backend", "label": "check", "sublabel": "read-only drift report", "pos": [895, 240], "size": [190, 70] }
+    { "id": "graft", "type": "database", "label": "Graft MCP", "sublabel": "Cursor + Codex + Claude", "pos": [575, 410], "size": [200, 70] },
+    { "id": "lock", "type": "database", "label": "Lockfile", "sublabel": "version + SHA-256 + MCP", "pos": [575, 570], "size": [200, 70] },
+    { "id": "check", "type": "backend", "label": "check", "sublabel": "read-only drift report", "pos": [895, 330], "size": [190, 70] }
   ],
   "connections": [
     { "id": "choose-profile", "from": "profile", "to": "manifest", "label": "init defaults" },
@@ -22,13 +23,15 @@
     { "id": "vendor-source", "from": "package", "to": "install", "label": "versioned files" },
     { "id": "write-instructions", "from": "install", "to": "instructions", "label": "managed blocks" },
     { "id": "vendor-skills", "from": "install", "to": "skills", "label": "copy skills" },
+    { "id": "write-graft", "from": "install", "to": "graft", "label": "generate MCP" },
     { "id": "write-lock", "from": "install", "to": "lock", "label": "record hashes" },
     { "id": "inspect-skills", "from": "skills", "to": "check", "label": "compare files" },
+    { "id": "inspect-graft", "from": "graft", "to": "check", "label": "compare config" },
     { "id": "inspect-lock", "from": "lock", "to": "check", "label": "compare hashes" }
   ],
   "cards": [
     { "dot": "cyan", "title": "One desired state", "items": ["The manifest selects the profile, clients and skills.", "install vendors files into the project."] },
-    { "dot": "emerald", "title": "Three clients", "items": ["Cursor and Codex read .agents/skills directly.", "Claude Code uses generated .claude/skills copies."] },
-    { "dot": "rose", "title": "Drift", "items": ["check does not write files.", "A mismatch returns a non-zero status."] }
+    { "dot": "emerald", "title": "Three clients", "items": ["Cursor and Codex read .agents/skills directly.", "Claude Code uses generated .claude/skills copies.", "Graft is configured for every selected client."] },
+    { "dot": "rose", "title": "Drift", "items": ["check does not write files.", "Skills, MCP configuration, and the lock are checked."] }
   ]
 }

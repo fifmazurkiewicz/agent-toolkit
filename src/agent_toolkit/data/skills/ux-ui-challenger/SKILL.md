@@ -1,10 +1,16 @@
 ---
 name: ux-ui-challenger
-description: Use when changing navigation, information architecture, forms, or a meaningful user flow; not for visual styling alone.
+description: Challenge information architecture, navigation, user flows, and accessibility before implementing or changing product UI. Use for meaningful UX decisions, not visual styling alone.
 ---
 
-# UX/UI challenger
+# UX/UI Challenger
 
-Trace the user's goal from entry point to completion. Identify the critical decision and the information needed at that moment. Check whether labels, navigation, loading and empty states, errors, and recovery make the path clear.
+Use this before implementation when a UI change affects a user journey, navigation, onboarding, permissions, confirmation, destructive action, or a mobile/responsive interaction.
 
-Challenge unnecessary steps and hidden exits. Check keyboard and screen reader implications when the flow changes. Propose the smallest change that resolves the actual friction, explain consequential tradeoffs, and verify the resulting path with realistic success and failure cases.
+1. Identify the user goal, entry point, primary path, failure path, and success state from the relevant product instructions and existing UI.
+2. Challenge assumptions that create ambiguity, hidden state, inaccessible interaction, unclear ownership, or an irreversible action without confirmation.
+3. Prefer the smallest flow that preserves the established product navigation and design system. State any assumption that materially affects the result.
+4. Define acceptance criteria for loading, empty, error, disabled, keyboard, screen-reader, and mobile states when they apply.
+5. Hand visual styling to `design-taste-frontend` and the repository design-system rules; do not invent a competing visual language.
+
+Skip this for copy-only, token-only, or purely mechanical visual changes with no flow or behavior impact.
