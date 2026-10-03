@@ -31,6 +31,7 @@ my-project/
   .mcp.json                 # generated Graft entry for Claude Code
   .agent/manifest.yaml      # desired state, edit this
   .agent/lock.yaml          # generated version and file hashes
+  .agent/context/           # project-owned change context when lifecycle is used
   .agents/skills/           # canonical vendored runtime skills for Cursor and Codex
   .cursor/mcp.json          # generated Graft entry for Cursor
   .codex/config.toml        # managed Graft block for Codex
@@ -43,7 +44,11 @@ my-project/
 
 The toolkit is the source for general rules and reusable skills, not product decisions. It includes workflow, simplification, FastAPI, UI quality, accessibility, performance, SEO, diagram, and architecture skills. Profiles choose sensible defaults, while the manifest remains the desired state for an individual project.
 
-For a new product decision, use the happy path: `idea-validation → brainstorming → production-product-requirements → writing-plans → implementation/review`. Start at the earliest stage whose output is missing: `idea-validation` tests the problem and evidence, `brainstorming` shapes the solution, and `production-product-requirements` creates the production-ready product contract. Small, already-decided maintenance work can begin later in the sequence.
+For a meaningful change, use the happy path: `idea-validation → brainstorming → project-context-lifecycle → problem-framing → technical-research → decisions → production-product-requirements → writing-plans → plan-review → implementation/TDD → evidence → implementation-review → archive`. Start at the earliest stage whose output is missing: `idea-validation` tests the problem and evidence, `brainstorming` shapes the solution, and `production-product-requirements` creates the production-ready product contract. Small, already-decided maintenance work can begin later in the sequence.
+
+`project-context-lifecycle` defines project-owned `.agent/context/changes/<change-id>/` records for the active change, including `frame.md`, `research.md`, `decisions.md`, `plan.md`, `progress.md`, `evidence.md`, and review reports. `progress.md` is the canonical execution state. Finished change folders move to `.agent/context/archive/` after implementation review. Graft is the durable knowledge layer: query it before research, planning, implementation, and review; add only reusable, evidence-backed knowledge after archive. If Graft is unavailable, use focused `rg` and state the limitation. Do not create `lessons.md` as a competing knowledge store.
+
+`goal-implement` is opt-in, non-interactive execution of an approved plan. The plan must identify automated versus manual steps, allowed file scope, network and secret boundaries, and verification gates. It commits only after green verification, returns manual work as a checklist, makes no more than two repair attempts for one failed gate, and stops on structural drift instead of expanding scope.
 
 Graft is the only mandatory shared MCP. `install` configures it for every selected client with `npx -y @nanonets/graft mcp`, without credentials or runtime installation. Existing JSON MCP servers are preserved. Codex receives only a marked managed block; an unmarked, conflicting Graft table is rejected rather than overwritten. The standard requires a focused `rg` fallback when Graft cannot run.
 

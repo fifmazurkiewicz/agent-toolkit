@@ -114,6 +114,20 @@ def test_product_workflow_skills_are_selected_and_installed_by_profiles(tmp_path
         init(root, profile)
         config = yaml.safe_load((root / ".agent/manifest.yaml").read_text())
         skills = config["skills"]
+        workflow = [
+            "project-context-lifecycle",
+            "problem-framing",
+            "technical-research",
+            "production-product-requirements",
+            "writing-plans",
+            "plan-review",
+            "implementation",
+            "tdd",
+            "implementation-review",
+            "goal-implement",
+        ]
+        assert all(name in skills for name in workflow)
+        assert [skills.index(name) for name in workflow] == sorted(skills.index(name) for name in workflow)
         assert skills.index("brainstorming") < skills.index("idea-validation")
         assert skills.index("idea-validation") < skills.index("production-product-requirements")
         assert skills.index("production-product-requirements") < skills.index("writing-plans")
@@ -121,6 +135,38 @@ def test_product_workflow_skills_are_selected_and_installed_by_profiles(tmp_path
         for directory in (".agents/skills", ".claude/skills"):
             assert (root / directory / "idea-validation/SKILL.md").is_file()
             assert (root / directory / "production-product-requirements/SKILL.md").is_file()
+
+
+def test_project_context_skills_define_graft_backed_lifecycle():
+    root = Path(__file__).resolve().parents[1]
+    lifecycle = (root / "skills/project-context-lifecycle/SKILL.md").read_text()
+    goal = (root / "skills/goal-implement/SKILL.md").read_text()
+    assert ".agent/context/changes/<change-id>/" in lifecycle
+    assert "progress.md" in lifecycle
+    assert "Graft" in lifecycle
+    assert "lessons.md" in lifecycle
+    assert "two repair attempts" in goal
+    assert "manual" in goal
+    assert "STOP" in goal
+
+
+def test_project_context_workflow_installs_for_all_selected_clients(tmp_path: Path):
+    init(tmp_path, "backend")
+    install(tmp_path)
+    names = (
+        "project-context-lifecycle",
+        "problem-framing",
+        "technical-research",
+        "plan-review",
+        "implementation",
+        "tdd",
+        "implementation-review",
+        "goal-implement",
+    )
+    for name in names:
+        for base in (".agents/skills", ".claude/skills"):
+            assert (tmp_path / base / name / "SKILL.md").is_file()
+    assert not check(tmp_path)
 
 
 def test_install_generates_graft_for_all_clients_and_preserves_json_servers(tmp_path: Path):
