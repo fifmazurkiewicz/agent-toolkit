@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "agent-toolkit: install and drift check",
+    "output": "docs/architecture/agent-toolkit.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    { "id": "profile", "type": "external", "label": "Profile", "sublabel": "web or backend", "pos": [45, 80], "size": [150, 62] },
+    { "id": "manifest", "type": "database", "label": "Manifest", "sublabel": ".agent/manifest.yaml", "pos": [45, 260], "size": [170, 64] },
+    { "id": "package", "type": "database", "label": "Toolkit package", "sublabel": "standard and skills", "pos": [295, 80], "size": [170, 62] },
+    { "id": "install", "type": "backend", "label": "install / update", "sublabel": "Python CLI", "pos": [295, 260], "size": [170, 64] },
+    { "id": "instructions", "type": "database", "label": "Project instructions", "sublabel": "AGENTS.md + CLAUDE.md", "pos": [575, 70], "size": [200, 70] },
+    { "id": "skills", "type": "database", "label": "Runtime skills", "sublabel": ".agents + .claude", "pos": [575, 240], "size": [200, 70] },
+    { "id": "lock", "type": "database", "label": "Lockfile", "sublabel": "version + SHA-256", "pos": [575, 410], "size": [200, 70] },
+    { "id": "check", "type": "backend", "label": "check", "sublabel": "read-only drift report", "pos": [895, 240], "size": [190, 70] }
+  ],
+  "connections": [
+    { "id": "choose-profile", "from": "profile", "to": "manifest", "label": "init defaults" },
+    { "id": "declare-state", "from": "manifest", "to": "install", "label": "desired state", "variant": "emphasis" },
+    { "id": "vendor-source", "from": "package", "to": "install", "label": "versioned files" },
+    { "id": "write-instructions", "from": "install", "to": "instructions", "label": "managed blocks" },
+    { "id": "vendor-skills", "from": "install", "to": "skills", "label": "copy skills" },
+    { "id": "write-lock", "from": "install", "to": "lock", "label": "record hashes" },
+    { "id": "inspect-skills", "from": "skills", "to": "check", "label": "compare files" },
+    { "id": "inspect-lock", "from": "lock", "to": "check", "label": "compare hashes" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "One desired state", "items": ["The manifest selects the profile, clients and skills.", "install vendors files into the project."] },
+    { "dot": "emerald", "title": "Three clients", "items": ["Cursor and Codex read .agents/skills directly.", "Claude Code uses generated .claude/skills copies."] },
+    { "dot": "rose", "title": "Drift", "items": ["check does not write files.", "A mismatch returns a non-zero status."] }
+  ]
+}

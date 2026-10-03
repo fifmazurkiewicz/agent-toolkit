@@ -1,0 +1,3 @@
+# Working on agent-toolkit
+
+Keep `AGENT_STANDARD.md`, `profiles/`, and first-party `skills/` synchronized with their packaged copies under `src/agent_toolkit/data/`. Archify is vendored only under packaged data; preserve its license and update it from a pinned release. Keep client adapters limited to discovery and instruction-file differences. When changing install, lock, or check behavior, run `pytest` and verify that `check` performs no writes. Update the routing fixtures when a skill description changes. When changing the architecture diagram, edit its JSON source and regenerate the HTML with the pinned Archify renderer.

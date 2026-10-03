@@ -1,0 +1,28 @@
+should_trigger:
+  - prompt: "Zaprojektuj nowy panel klienta; najpierw ustalmy cel i zakres."
+    expected: [brainstorming]
+  - prompt: "Mamy zaakceptowany projekt przebudowy checkoutu. Rozpisz kroki wdrożenia i testy."
+    expected: [writing-plans]
+  - prompt: "Zmień nawigację, aby użytkownik mógł łatwo wrócić do koszyka po błędzie płatności."
+    expected: [ux-ui-challenger]
+  - prompt: "Zrób audyt klawiatury i czytnika ekranu dla formularza rejestracji."
+    expected: [accessibility]
+  - prompt: "Sprawdź endpoint logowania pod kątem walidacji i ujawniania sekretów."
+    expected: [best-practices]
+should_not_trigger:
+  - prompt: "Popraw literówkę w zdaniu na stronie głównej."
+    excluded: [brainstorming, writing-plans, ux-ui-challenger]
+  - prompt: "Zmień odcień tła przycisku zgodnie z istniejącym tokenem koloru."
+    excluded: [ux-ui-challenger, accessibility]
+  - prompt: "Wyjaśnij, czym jest HTTP 404; nie zmieniaj kodu."
+    excluded: [best-practices, writing-plans]
+competition:
+  - prompt: "Chcę nową ścieżkę onboardingu. Nie znam jeszcze problemu użytkownika ani wymagań."
+    expected: [brainstorming]
+    excluded: [writing-plans]
+  - prompt: "Projekt onboardingu jest zatwierdzony. Rozpisz sekwencję implementacji."
+    expected: [writing-plans]
+    excluded: [brainstorming]
+  - prompt: "Mamy ustalony ekran; sprawdź, czy kolejność kroków i powrót po błędzie są zrozumiałe."
+    expected: [ux-ui-challenger]
+    excluded: [brainstorming, writing-plans]
