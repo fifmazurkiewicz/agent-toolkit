@@ -18,6 +18,18 @@ def test_packaged_content_matches_authoring_files():
                 assert source.read_bytes() == data_file(parent, *source.relative_to(root / parent).parts).read_bytes()
 
 
+def test_python_service_architecture_skill_is_opt_in():
+    from agent_toolkit.core import data_file
+
+    root = Path(__file__).resolve().parents[1]
+    source = root / "skills/python-service-architecture/SKILL.md"
+    packaged = data_file("skills", "python-service-architecture", "SKILL.md")
+    assert source.read_bytes() == packaged.read_bytes()
+    for profile in ("web", "backend"):
+        skills = yaml.safe_load((root / "profiles" / f"{profile}.yaml").read_text())["skills"]
+        assert "python-service-architecture" not in skills
+
+
 def test_install_is_idempotent_and_preserves_user_text(tmp_path: Path):
     (tmp_path / "AGENTS.md").write_text("# My project\n\nKeep this.\n", encoding="utf-8")
     (tmp_path / "CLAUDE.md").write_text("# Claude local\n", encoding="utf-8")
