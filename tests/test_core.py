@@ -137,6 +137,7 @@ def test_product_workflow_skills_are_selected_and_installed_by_profiles(tmp_path
             "implementation",
             "tdd",
             "implementation-review",
+            "review-decisions",
             "goal-implement",
         ]
         assert all(name in skills for name in workflow)
@@ -150,6 +151,7 @@ def test_product_workflow_skills_are_selected_and_installed_by_profiles(tmp_path
             assert (root / directory / "idea-validation/SKILL.md").is_file()
             assert (root / directory / "production-product-requirements/SKILL.md").is_file()
             assert (root / directory / "planning-boards/SKILL.md").is_file()
+            assert (root / directory / "review-decisions/SKILL.md").is_file()
 
 
 def test_project_context_skills_define_graft_backed_lifecycle():
@@ -182,12 +184,33 @@ def test_project_context_workflow_installs_for_all_selected_clients(tmp_path: Pa
         "implementation",
         "tdd",
         "implementation-review",
+        "review-decisions",
         "goal-implement",
     )
     for name in names:
         for base in (".agents/skills", ".claude/skills"):
             assert (tmp_path / base / name / "SKILL.md").is_file()
     assert not check(tmp_path)
+
+
+def test_review_decisions_are_selected_installed_and_canonical():
+    root = Path(__file__).resolve().parents[1]
+    review = (root / "skills/implementation-review/SKILL.md").read_text()
+    decisions = (root / "skills/review-decisions/SKILL.md").read_text()
+    lifecycle = (root / "skills/project-context-lifecycle/SKILL.md").read_text()
+    boards = (root / "skills/planning-boards/SKILL.md").read_text()
+
+    assert "reviews/review-decisions.md" in review
+    assert "reviews/review-decisions.md" in decisions
+    assert "reviews/review-decisions-kanban.html" in decisions
+    assert "human owner" in decisions
+    assert "reviews/review-decisions.md" in lifecycle
+    assert "review-decisions-kanban.html" in boards
+
+    for profile in ("web", "backend"):
+        skills = yaml.safe_load((root / "profiles" / f"{profile}.yaml").read_text())["skills"]
+        assert skills.index("implementation-review") < skills.index("review-decisions")
+        assert skills.index("review-decisions") < skills.index("goal-implement")
 
 
 def test_install_generates_graft_for_all_clients_and_preserves_json_servers(tmp_path: Path):

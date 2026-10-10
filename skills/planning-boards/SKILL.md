@@ -15,10 +15,16 @@ and inline-SVG Kanban diagrams.
 | --- | --- | --- |
 | Product | `docs/roadmap.md` | `docs/roadmap-kanban.html` |
 | Active change | `plan.md` and `progress.md` | `.agent/context/changes/<change-id>/plan-kanban.html` |
+| Review findings | `reviews/review-decisions.md` | `reviews/review-decisions-kanban.html` |
 
 The Markdown records are the source of truth. A board must show the source
 files and generation date, but it must never become the only place that
 records a decision, scope change, blocker, dependency, or completion.
+
+Review-decision cards are one per non-informational finding. Use columns
+**Fix now**, **Fix differently**, **Skip**, and **Record as lesson**; each card
+shows its stable ID, severity, impact, owner, status, and canonical reference.
+Do not create a decision card for an information-only note.
 
 ## Board contract
 
