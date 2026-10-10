@@ -128,6 +128,7 @@ def test_product_workflow_skills_are_selected_and_installed_by_profiles(tmp_path
         skills = config["skills"]
         workflow = [
             "project-context-lifecycle",
+            "planning-boards",
             "problem-framing",
             "technical-research",
             "production-product-requirements",
@@ -142,16 +143,19 @@ def test_product_workflow_skills_are_selected_and_installed_by_profiles(tmp_path
         assert [skills.index(name) for name in workflow] == sorted(skills.index(name) for name in workflow)
         assert skills.index("brainstorming") < skills.index("idea-validation")
         assert skills.index("idea-validation") < skills.index("production-product-requirements")
+        assert skills.index("project-context-lifecycle") < skills.index("planning-boards")
         assert skills.index("production-product-requirements") < skills.index("writing-plans")
         install(root)
         for directory in (".agents/skills", ".claude/skills"):
             assert (root / directory / "idea-validation/SKILL.md").is_file()
             assert (root / directory / "production-product-requirements/SKILL.md").is_file()
+            assert (root / directory / "planning-boards/SKILL.md").is_file()
 
 
 def test_project_context_skills_define_graft_backed_lifecycle():
     root = Path(__file__).resolve().parents[1]
     lifecycle = (root / "skills/project-context-lifecycle/SKILL.md").read_text()
+    boards = (root / "skills/planning-boards/SKILL.md").read_text()
     goal = (root / "skills/goal-implement/SKILL.md").read_text()
     assert ".agent/context/changes/<change-id>/" in lifecycle
     assert "progress.md" in lifecycle
@@ -160,6 +164,10 @@ def test_project_context_skills_define_graft_backed_lifecycle():
     assert "two repair attempts" in goal
     assert "manual" in goal
     assert "STOP" in goal
+    assert "docs/roadmap.md" in boards
+    assert "roadmap-kanban.html" in boards
+    assert "plan-kanban.html" in boards
+    assert "source of truth" in boards
 
 
 def test_project_context_workflow_installs_for_all_selected_clients(tmp_path: Path):
@@ -167,6 +175,7 @@ def test_project_context_workflow_installs_for_all_selected_clients(tmp_path: Pa
     install(tmp_path)
     names = (
         "project-context-lifecycle",
+        "planning-boards",
         "problem-framing",
         "technical-research",
         "plan-review",

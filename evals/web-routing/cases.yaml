@@ -3,6 +3,8 @@ should_trigger:
     expected: [brainstorming]
   - prompt: "Mamy zaakceptowany projekt przebudowy checkoutu. Rozpisz kroki wdrożenia i testy."
     expected: [writing-plans]
+  - prompt: "Pokaż roadmapę produktu i aktywną zmianę jako aktualizowane tablice Kanban."
+    expected: [planning-boards]
   - prompt: "Zmień nawigację, aby użytkownik mógł łatwo wrócić do koszyka po błędzie płatności."
     expected: [ux-ui-challenger]
   - prompt: "Zrób audyt klawiatury i czytnika ekranu dla formularza rejestracji."
@@ -15,7 +17,7 @@ should_not_trigger:
   - prompt: "Zmień odcień tła przycisku zgodnie z istniejącym tokenem koloru."
     excluded: [ux-ui-challenger, accessibility]
   - prompt: "Wyjaśnij, czym jest HTTP 404; nie zmieniaj kodu."
-    excluded: [best-practices, writing-plans]
+    excluded: [best-practices, writing-plans, planning-boards]
 competition:
   - prompt: "Chcę nową ścieżkę onboardingu. Nie znam jeszcze problemu użytkownika ani wymagań."
     expected: [brainstorming]

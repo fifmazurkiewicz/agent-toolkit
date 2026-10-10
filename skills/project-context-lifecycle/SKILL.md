@@ -16,6 +16,7 @@ already-understood edit that needs no durable change record.
   foundation/                 # optional stable, explicit project contracts
   changes/<change-id>/
     frame.md  research.md  decisions.md  plan.md  progress.md  evidence.md
+    plan-kanban.html       # derived from plan.md and progress.md
     reviews/
   archive/<change-id>/
 ```
@@ -23,6 +24,11 @@ already-understood edit that needs no durable change record.
 `progress.md` is the canonical execution state. Record facts in `research.md`,
 choices and rationale in `decisions.md`, and observed verification in
 `evidence.md`; do not merge their purposes.
+
+For a product with multiple milestones, maintain `docs/roadmap.md` and its
+derived `docs/roadmap-kanban.html`. For each meaningful change, create and
+synchronize `plan-kanban.html` only after the plan exists. The Markdown
+records are the source of truth; the boards are derived views.
 
 ## Lifecycle
 

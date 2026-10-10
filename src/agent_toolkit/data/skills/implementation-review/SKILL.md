@@ -11,6 +11,10 @@ focused `rg` if Graft is unavailable. Write
 coverage, test evidence, security and privacy impact, convention alignment,
 and a clear approve/revise outcome.
 
+When planning boards exist, reconcile every displayed status with `plan.md`,
+`progress.md`, and evidence. A mismatch is a revise outcome: update canonical
+records first, then regenerate the affected board.
+
 Require evidence for every accepted criterion. Do not edit implementation as
 part of review or archive a change with unresolved blockers unless a human
 owner explicitly accepts them. Return concrete fixes to implementation.
