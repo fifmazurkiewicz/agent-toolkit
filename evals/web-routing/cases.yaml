@@ -1,5 +1,5 @@
 should_trigger:
-  - prompt: "Review my uncommitted code changes with CodeRabbit before merge."
+  - prompt: "Review my uncommitted code changes for bugs, security issues, and missing tests before merge."
     expected: [implementation-review]
   - prompt: "Zaprojektuj nowy panel klienta; najpierw ustalmy cel i zakres."
     expected: [brainstorming]
