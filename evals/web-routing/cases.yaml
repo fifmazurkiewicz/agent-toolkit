@@ -1,4 +1,6 @@
 should_trigger:
+  - prompt: "Review my uncommitted code changes with CodeRabbit before merge."
+    expected: [implementation-review]
   - prompt: "Zaprojektuj nowy panel klienta; najpierw ustalmy cel i zakres."
     expected: [brainstorming]
   - prompt: "Mamy zaakceptowany projekt przebudowy checkoutu. Rozpisz kroki wdrożenia i testy."
@@ -17,7 +19,7 @@ should_not_trigger:
   - prompt: "Zmień odcień tła przycisku zgodnie z istniejącym tokenem koloru."
     excluded: [ux-ui-challenger, accessibility]
   - prompt: "Wyjaśnij, czym jest HTTP 404; nie zmieniaj kodu."
-    excluded: [best-practices, writing-plans, planning-boards]
+    excluded: [best-practices, writing-plans, planning-boards, implementation-review]
 competition:
   - prompt: "Chcę nową ścieżkę onboardingu. Nie znam jeszcze problemu użytkownika ani wymagań."
     expected: [brainstorming]
