@@ -132,6 +132,7 @@ def test_product_workflow_skills_are_selected_and_installed_by_profiles(tmp_path
             "problem-framing",
             "technical-research",
             "production-product-requirements",
+            "test-strategy",
             "writing-plans",
             "plan-review",
             "implementation",
@@ -152,6 +153,7 @@ def test_product_workflow_skills_are_selected_and_installed_by_profiles(tmp_path
             assert (root / directory / "production-product-requirements/SKILL.md").is_file()
             assert (root / directory / "planning-boards/SKILL.md").is_file()
             assert (root / directory / "review-decisions/SKILL.md").is_file()
+            assert (root / directory / "test-strategy/SKILL.md").is_file()
 
 
 def test_project_context_skills_define_graft_backed_lifecycle():
@@ -241,3 +243,19 @@ def test_check_detects_graft_drift_without_writing(tmp_path: Path):
     assert any("Graft MCP configuration" in error for error in check(tmp_path))
     after = {p.relative_to(tmp_path): p.read_bytes() for p in tmp_path.rglob("*") if p.is_file()}
     assert before == after
+
+
+def test_test_strategy_is_the_shared_source_for_test_risks():
+    root = Path(__file__).resolve().parents[1]
+    strategy = (root / "skills/test-strategy/SKILL.md").read_text()
+    standard = (root / "AGENT_STANDARD.md").read_text()
+    assert "docs/testing-strategy.md" in strategy
+    for section in ("Key risks", "Evidence", "Existing test profile", "QA phases", "Useful test types", "Agent quality boosts", "Cookbook"):
+        assert section in strategy
+    assert "abuse scenario" in strategy
+    assert "human owner" in strategy
+    assert "draft" in strategy
+    assert "docs/testing-strategy.md" in standard
+    assert "abuse scenario" in standard
+    for name in ("tdd", "writing-plans", "implementation-review"):
+        assert "docs/testing-strategy.md" in (root / "skills" / name / "SKILL.md").read_text()

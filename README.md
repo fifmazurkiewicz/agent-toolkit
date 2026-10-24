@@ -1,4 +1,4 @@
-# agent-toolkit v1.4
+# agent-toolkit v1.5
 
 Small, versioned standards and vendored skills for Cursor, Codex and Claude Code. A project's `.agent/manifest.yaml` declares desired state; `.agent/lock.yaml` records the installed toolkit version and SHA-256 of each vendored skill file. Both profiles include [Archify](https://github.com/tt-a1i/archify) for validated interactive architecture diagrams.
 
@@ -53,6 +53,8 @@ For a meaningful change, use the happy path: `idea-validation → brainstorming 
 `implementation-review` is a self-contained AI code-review skill: it uses the current session and existing repository tools, with no additional account, CLI, service, or installation. A fresh reviewer agent inspects changes independently when subagents are available; otherwise the agent performs an explicit second pass and discloses that limitation. Findings cover bugs, regressions, security/privacy, failure paths, and missing tests, and flow through the existing review-decision workflow. Upgrade to v1.3.1, then run `agent-toolkit update` in existing projects to receive these instructions. This replaces the external CodeRabbit requirement introduced in v1.3.0.
 
 The standard sets test depth from a risk map. Before writing tests for a meaningful change, the agent rates each main failure scenario high, medium, or low for impact and likelihood and records the map with the plan. High impact, or medium impact with high likelihood, requires behavioral tests of the failure, error, and edge cases at the level that exercises them; medium/medium or low impact with high likelihood requires a focused test of the main path and known failure; other scenarios may rely on stated existing coverage or a smoke check. Upgrade to v1.4.0, then run `agent-toolkit update` in existing projects to receive this rule.
+
+`test-strategy` keeps a project-owned `docs/testing-strategy.md`: the confirmed risk map with its sources, the existing test profile, the QA phases and test types that address each risk, how agent work raises quality, and a cookbook for extending existing tests. Before use it checks that risks are realistic, sourced, described in user and business terms, and include an abuse scenario when the project has authentication, payments, or secrets; the human owner confirms the ratings. `writing-plans`, `tdd`, and `implementation-review` read the document instead of re-deriving risks. Upgrade to v1.5.0 and run `agent-toolkit update`; the toolkit installs the skill but does not write the strategy document.
 
 Graft is the only mandatory shared MCP. `install` configures it for every selected client with `npx -y @nanonets/graft mcp`, without credentials or runtime installation. Existing JSON MCP servers are preserved. Codex receives only a marked managed block; an unmarked, conflicting Graft table is rejected rather than overwritten. The standard requires a focused `rg` fallback when Graft cannot run.
 
