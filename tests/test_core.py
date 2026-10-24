@@ -104,7 +104,7 @@ def test_update_removes_deselected_managed_skill_and_claude_adapter(tmp_path: Pa
 def test_cli_check_exit_status(tmp_path: Path):
     assert main(["--project", str(tmp_path), "check"]) == 1
     assert main(["--project", str(tmp_path), "init", "--profile", "backend"]) == 0
-    assert main(["--project", str(tmp_path), "install"]) == 0
+    assert main(["--project", str(tmp_path), "install", "--no-graft-build"]) == 0
     assert main(["--project", str(tmp_path), "check"]) == 0
 
 
@@ -261,3 +261,44 @@ def test_test_strategy_is_the_shared_source_for_test_risks():
     assert "--deep" in standard
     for name in ("tdd", "writing-plans", "implementation-review"):
         assert "docs/testing-strategy.md" in (root / "skills" / name / "SKILL.md").read_text()
+
+
+def test_standard_carries_shared_defaults():
+    standard = (Path(__file__).resolve().parents[1] / "AGENT_STANDARD.md").read_text()
+    for text in ("Vercel", "GDPR", "never request it in chat", "44px", "ask the user to review it", "do not change deployment or runtime configuration"):
+        assert text in standard
+
+
+def test_graft_build_reports_missing_node(tmp_path: Path, monkeypatch):
+    from agent_toolkit import local
+
+    monkeypatch.setattr(local.shutil, "which", lambda name: None)
+    assert "npx is unavailable" in local.build_graft(tmp_path)
+
+
+def test_setup_approves_graft_for_each_client_idempotently(tmp_path: Path, monkeypatch):
+    from agent_toolkit import local
+
+    project, home = tmp_path / "project", tmp_path / "home"
+    init(project)
+    (project / ".git/info").mkdir(parents=True)
+    (home / ".codex").mkdir(parents=True)
+    (home / ".codex/config.toml").write_text('model = "x"\n', encoding="utf-8")
+    (project / ".claude").mkdir()
+    (project / ".claude/settings.local.json").write_text('{"permissions": {"allow": []}}', encoding="utf-8")
+    monkeypatch.setattr(local.shutil, "which", lambda name: None)
+    before = {p: p.read_bytes() for p in project.rglob("*") if p.is_file() and ".claude" not in p.parts and ".git" not in p.parts}
+
+    steps = local.setup(project, home)
+    assert steps == ["Codex: project trusted", "Cursor: CLI not found; run `agent mcp enable graft` in the project", "Claude Code: graft approved"]
+    config = (home / ".codex/config.toml").read_text()
+    assert config.startswith('model = "x"\n') and f'[projects."{project}"]\ntrust_level = "trusted"\n' in config
+    claude = json.loads((project / ".claude/settings.local.json").read_text())
+    assert claude == {"permissions": {"allow": []}, "enabledMcpjsonServers": ["graft"]}
+    assert "/.claude/settings.local.json" in (project / ".git/info/exclude").read_text().splitlines()
+    assert before == {p: p.read_bytes() for p in before}
+
+    local.setup(project, home)
+    assert (home / ".codex/config.toml").read_text() == config
+    assert json.loads((project / ".claude/settings.local.json").read_text()) == claude
+    assert (project / ".git/info/exclude").read_text().count("settings.local.json") == 1
