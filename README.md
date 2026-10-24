@@ -1,4 +1,4 @@
-# agent-toolkit v1.5
+# agent-toolkit v1.6
 
 Small, versioned standards and vendored skills for Cursor, Codex and Claude Code. A project's `.agent/manifest.yaml` declares desired state; `.agent/lock.yaml` records the installed toolkit version and SHA-256 of each vendored skill file. Both profiles include [Archify](https://github.com/tt-a1i/archify) for validated interactive architecture diagrams.
 
@@ -56,7 +56,7 @@ The standard sets test depth from a risk map. Before writing tests for a meaning
 
 `test-strategy` keeps a project-owned `docs/testing-strategy.md`: the confirmed risk map with its sources, the existing test profile, the QA phases and test types that address each risk, how agent work raises quality, and a cookbook for extending existing tests. Before use it checks that risks are realistic, sourced, described in user and business terms, and include an abuse scenario when the project has authentication, payments, or secrets; the human owner confirms the ratings. `writing-plans`, `tdd`, and `implementation-review` read the document instead of re-deriving risks. Upgrade to v1.5.0 and run `agent-toolkit update`; the toolkit installs the skill but does not write the strategy document.
 
-Graft is the only mandatory shared MCP. `install` configures it for every selected client with `npx -y @nanonets/graft mcp`, without credentials or runtime installation. Existing JSON MCP servers are preserved. Codex receives only a marked managed block; an unmarked, conflicting Graft table is rejected rather than overwritten. The standard requires a focused `rg` fallback when Graft cannot run.
+Graft is the only mandatory shared MCP. `install` configures it for every selected client with `npx -y @nanonets/graft mcp`, without credentials or runtime installation. Existing JSON MCP servers are preserved. Codex receives only a marked managed block; an unmarked, conflicting Graft table is rejected rather than overwritten. Graft serves no tools until the project has an index, so the standard requires `graft check` at the start of work and `graft build` when the index is missing or stale; the structural build is local, needs no LLM or key, and keeps `graft/` git-ignored, while `--deep` requires approval because it calls a paid LLM. Each client also needs a one-time local approval of the project MCP server: folder trust in Codex, `agent mcp enable graft` in Cursor, and the project-server prompt in Claude Code. The standard requires a focused `rg` fallback when Graft cannot run. Upgrade to v1.6.0 and run `agent-toolkit update` to receive the build rule.
 
 ## Discovery contract
 

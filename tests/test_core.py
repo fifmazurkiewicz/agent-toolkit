@@ -257,5 +257,7 @@ def test_test_strategy_is_the_shared_source_for_test_risks():
     assert "draft" in strategy
     assert "docs/testing-strategy.md" in standard
     assert "abuse scenario" in standard
+    assert "npx -y @nanonets/graft build" in standard
+    assert "--deep" in standard
     for name in ("tdd", "writing-plans", "implementation-review"):
         assert "docs/testing-strategy.md" in (root / "skills" / name / "SKILL.md").read_text()
