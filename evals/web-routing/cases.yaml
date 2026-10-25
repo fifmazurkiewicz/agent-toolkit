@@ -17,6 +17,8 @@ should_trigger:
     expected: [test-strategy]
   - prompt: "Napisz testy jednostkowe dla backend/app/patients/service.py na podstawie dokumentacji."
     expected: [behavioral-tests]
+  - prompt: "Sprawdź testami mutacyjnymi, czy testy modułu płatności naprawdę łapią błędy."
+    expected: [mutation-testing]
 should_not_trigger:
   - prompt: "Popraw literówkę w zdaniu na stronie głównej."
     excluded: [brainstorming, writing-plans, ux-ui-challenger]

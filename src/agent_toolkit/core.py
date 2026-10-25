@@ -11,7 +11,7 @@ from pathlib import Path
 import yaml
 
 from . import __version__
-from .adapters import claude, codex, cursor, graft
+from .adapters import claude, codex, cursor, gitleaks, graft
 
 START = "<!-- agent-toolkit:standard v1 start -->"
 END = "<!-- agent-toolkit:standard end -->"
@@ -132,6 +132,15 @@ def mcp_text(path: Path, renderer) -> str:
         raise ToolkitError(f"{path}: {exc}") from exc
 
 
+def gitleaks_text(root: Path) -> str:
+    target = gitleaks.path(root)
+    current = target.read_text(encoding="utf-8") if target.exists() else ""
+    try:
+        return gitleaks.with_allowlist(current)
+    except gitleaks.GitleaksConfigError as exc:
+        raise ToolkitError(f"{target}: {exc}") from exc
+
+
 def expected_mcp_files(root: Path, clients: list[str]) -> dict[Path, str]:
     result: dict[Path, str] = {}
     if "cursor" in clients:
@@ -163,6 +172,7 @@ def install(root: Path) -> None:
     # Validate all managed blocks before writing anything.
     agent_text = standard_block(root)
     mcp_files = expected_mcp_files(root, config["clients"])
+    gitleaks_config = gitleaks_text(root)
     claude_path = root / "CLAUDE.md"
     claude_text = None
     if "claude" in config["clients"]:
@@ -201,6 +211,7 @@ def install(root: Path) -> None:
     for path, text in mcp_files.items():
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="utf-8")
+    gitleaks.path(root).write_text(gitleaks_config, encoding="utf-8")
     if claude_text is not None and ("claude" in config["clients"] or claude_path.exists()):
         claude_path.write_text(claude_text, encoding="utf-8")
     if "claude" in config["clients"]:
@@ -263,6 +274,12 @@ def check(root: Path) -> list[str]:
         return errors + ["Malformed lock skills mapping"]
     if actual_lock.get("toolkit_version") != __version__ or actual_lock.get("profile") != config["profile"] or actual_lock.get("clients") != config["clients"] or actual_lock.get("mcp_servers") != ["graft"] or set(locked_skills) != set(config["skills"]):
         errors.append("Manifest/lock metadata differs")
+    try:
+        target = gitleaks.path(root)
+        if not target.exists() or target.read_text(encoding="utf-8") != gitleaks_text(root):
+            errors.append("Gitleaks allowlist differs: .gitleaks.toml")
+    except ToolkitError as exc:
+        errors.append(f"Gitleaks allowlist: {exc}")
     try:
         mcp_files = expected_mcp_files(root, config["clients"])
     except ToolkitError as exc:

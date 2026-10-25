@@ -138,6 +138,7 @@ def test_product_workflow_skills_are_selected_and_installed_by_profiles(tmp_path
             "implementation",
             "tdd",
             "behavioral-tests",
+            "mutation-testing",
             "implementation-review",
             "review-decisions",
             "goal-implement",
@@ -156,6 +157,7 @@ def test_product_workflow_skills_are_selected_and_installed_by_profiles(tmp_path
             assert (root / directory / "review-decisions/SKILL.md").is_file()
             assert (root / directory / "test-strategy/SKILL.md").is_file()
             assert (root / directory / "behavioral-tests/SKILL.md").is_file()
+            assert (root / directory / "mutation-testing/SKILL.md").is_file()
 
 
 def test_project_context_skills_define_graft_backed_lifecycle():
@@ -315,3 +317,34 @@ def test_behavioral_tests_skill_defines_the_three_stages():
         assert "behavioral-tests" in (root / "skills" / name / "SKILL.md").read_text()
     assert "duplicate one another" in (root / "skills/implementation-review/SKILL.md").read_text()
     assert "`behavioral-tests`" in (root / "AGENT_STANDARD.md").read_text()
+
+
+def test_mutation_testing_is_consent_gated_and_language_aware():
+    root = Path(__file__).resolve().parents[1]
+    skill = (root / "skills/mutation-testing/SKILL.md").read_text()
+    for text in ("always ask before running", "Never run mutation testing or add its tooling without explicit approval", "mutmut", "StrykerJS", "Never install\nglobal tools", "Equivalent"):
+        assert text in skill
+    assert "`mutation-testing`" in (root / "skills/behavioral-tests/SKILL.md").read_text()
+
+
+def test_install_manages_gitleaks_allowlist_and_preserves_project_rules(tmp_path: Path):
+    project_rules = 'title = "x"\n\n[extend]\nuseDefault = true\n\n[allowlist]\npaths = [\'\'\'\\.env\\.example$\'\'\']\n'
+    (tmp_path / ".gitleaks.toml").write_text(project_rules, encoding="utf-8")
+    init(tmp_path)
+    install(tmp_path)
+    config = (tmp_path / ".gitleaks.toml").read_text()
+    assert config.startswith(project_rules.rstrip("\n"))
+    assert config.count("# agent-toolkit:gitleaks start") == 1
+    assert "[[allowlists]]" in config and "agent/lock" in config
+    install(tmp_path)
+    assert (tmp_path / ".gitleaks.toml").read_text() == config
+    assert not check(tmp_path)
+    (tmp_path / ".gitleaks.toml").write_text(project_rules, encoding="utf-8")
+    assert "Gitleaks allowlist differs: .gitleaks.toml" in check(tmp_path)
+
+
+def test_new_gitleaks_config_extends_default_rules(tmp_path: Path):
+    init(tmp_path)
+    install(tmp_path)
+    assert (tmp_path / ".gitleaks.toml").read_text().startswith("[extend]\nuseDefault = true\n")
+
