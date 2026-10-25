@@ -2,11 +2,14 @@
 
 The lock records SHA-256 hashes next to file names, which Gitleaks'
 generic-api-key rule reports as secrets. The managed block allowlists only
-that path and leaves any project rules in the same file untouched.
+that path and leaves any project rules in the same file untouched, except
+that a legacy `[allowlist]` table becomes `[[allowlists]]`: Gitleaks 8.25+
+refuses to load a config that mixes the two forms.
 """
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 START = "# agent-toolkit:gitleaks start"
@@ -21,6 +24,7 @@ useDefault = true
 
 {BODY}
 """
+LEGACY = re.compile(r"^\[allowlist\][ \t]*$", re.MULTILINE)
 
 
 class GitleaksConfigError(ValueError):
@@ -38,6 +42,7 @@ def with_allowlist(content: str) -> str:
     opening, closing = content.count(START), content.count(END)
     if opening != closing or opening > 1:
         raise GitleaksConfigError("Malformed managed block in .gitleaks.toml")
+    content = LEGACY.sub("[[allowlists]]", content)
     if opening:
         left, rest = content.split(START, 1)
         _, right = rest.split(END, 1)

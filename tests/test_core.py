@@ -333,7 +333,8 @@ def test_install_manages_gitleaks_allowlist_and_preserves_project_rules(tmp_path
     init(tmp_path)
     install(tmp_path)
     config = (tmp_path / ".gitleaks.toml").read_text()
-    assert config.startswith(project_rules.rstrip("\n"))
+    assert config.startswith(project_rules.replace("[allowlist]", "[[allowlists]]").rstrip("\n"))
+    assert "[allowlist]\n" not in config
     assert config.count("# agent-toolkit:gitleaks start") == 1
     assert "[[allowlists]]" in config and "agent/lock" in config
     install(tmp_path)
