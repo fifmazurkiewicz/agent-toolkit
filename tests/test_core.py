@@ -137,6 +137,7 @@ def test_product_workflow_skills_are_selected_and_installed_by_profiles(tmp_path
             "plan-review",
             "implementation",
             "tdd",
+            "behavioral-tests",
             "implementation-review",
             "review-decisions",
             "goal-implement",
@@ -154,6 +155,7 @@ def test_product_workflow_skills_are_selected_and_installed_by_profiles(tmp_path
             assert (root / directory / "planning-boards/SKILL.md").is_file()
             assert (root / directory / "review-decisions/SKILL.md").is_file()
             assert (root / directory / "test-strategy/SKILL.md").is_file()
+            assert (root / directory / "behavioral-tests/SKILL.md").is_file()
 
 
 def test_project_context_skills_define_graft_backed_lifecycle():
@@ -302,3 +304,14 @@ def test_setup_approves_graft_for_each_client_idempotently(tmp_path: Path, monke
     assert (home / ".codex/config.toml").read_text() == config
     assert json.loads((project / ".claude/settings.local.json").read_text()) == claude
     assert (project / ".git/info/exclude").read_text().count("settings.local.json") == 1
+
+
+def test_behavioral_tests_skill_defines_the_three_stages():
+    root = Path(__file__).resolve().parents[1]
+    skill = (root / "skills/behavioral-tests/SKILL.md").read_text()
+    for text in ("rather than what it currently does", "STOP and ask", "observable outcome", "never reuse the logic", "different regression", "mark the row uncertain"):
+        assert text in skill
+    for name in ("tdd", "test-strategy"):
+        assert "behavioral-tests" in (root / "skills" / name / "SKILL.md").read_text()
+    assert "duplicate one another" in (root / "skills/implementation-review/SKILL.md").read_text()
+    assert "`behavioral-tests`" in (root / "AGENT_STANDARD.md").read_text()

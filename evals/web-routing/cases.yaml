@@ -15,6 +15,8 @@ should_trigger:
     expected: [best-practices]
   - prompt: "Ten projekt nie ma jeszcze strategii testów. Ustal najważniejsze ryzyka i jak je testujemy."
     expected: [test-strategy]
+  - prompt: "Napisz testy jednostkowe dla backend/app/patients/service.py na podstawie dokumentacji."
+    expected: [behavioral-tests]
 should_not_trigger:
   - prompt: "Popraw literówkę w zdaniu na stronie głównej."
     excluded: [brainstorming, writing-plans, ux-ui-challenger]
@@ -23,6 +25,9 @@ should_not_trigger:
   - prompt: "Wyjaśnij, czym jest HTTP 404; nie zmieniaj kodu."
     excluded: [best-practices, writing-plans, planning-boards, implementation-review]
 competition:
+  - prompt: "Dodaj testy do istniejącego modułu płatności; kod już działa na produkcji."
+    expected: [behavioral-tests]
+    excluded: [tdd]
   - prompt: "Strategia testów jest gotowa. Dodaj test, który najpierw nie przechodzi, dla walidacji kwoty przelewu."
     expected: [tdd]
     excluded: [test-strategy]
