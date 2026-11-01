@@ -1,4 +1,4 @@
-# agent-toolkit v1.11
+# agent-toolkit v1.12
 
 Small, versioned standards and vendored skills for Cursor, Codex and Claude Code. A project's `.agent/manifest.yaml` declares desired state; `.agent/lock.yaml` records the installed toolkit version and SHA-256 of each vendored skill file. Both profiles include [Archify](https://github.com/tt-a1i/archify) for validated interactive architecture diagrams.
 
@@ -98,6 +98,22 @@ Since v1.7.0, `install` and `update` also build the local Graft index after writ
 `mutation-testing` (v1.9.0) is optional and always asks the user before it runs or adds tooling. It proposes a narrow scope, the tool, and its cost, then uses `mutmut` for Python with pytest (`cosmic-ray` only where a project already uses it) or StrykerJS for TypeScript and JavaScript with Vitest or Jest. Surviving mutants are triaged as equivalent, a gap closed with a behavioral test, or an accepted low-risk gap, and reported with the regression summary. The toolkit installs only the skill, never the tools. Add `mutation-testing` to existing manifests and run `agent-toolkit update`.
 
 Since v1.10.0 the standard requires GitHub Actions on pushes to `main` and pull requests, with a Gitleaks secret scan plus lint, format, type, test, and build checks for each stack, and agents check the run after every push instead of leaving `main` failing. `.agent/lock.yaml` stores SHA-256 hashes beside file names, which Gitleaks' `generic-api-key` rule reports as secrets, so `install` adds a marked `[[allowlists]]` block to `.gitleaks.toml` that allowlists only that path. Existing project rules in the file are preserved, except that a legacy `[allowlist]` table is renamed to `[[allowlists]]`, because Gitleaks 8.25+ refuses to load a config mixing both forms; a new file extends Gitleaks' default rules, and `check` reports a missing or changed block. Upgrade to v1.10.0 and run `agent-toolkit update`.
+
+## Sentry error-monitoring policy
+
+Since v1.12.0, new application projects include Sentry error monitoring as a
+shared requirement. Use the official SDK at application entrypoints, report
+unexpected and terminal job failures, and verify that real outbound events
+contain only approved technical metadata before enabling ingestion. Replay,
+profiling, tracing and bulk log forwarding are outside the default scope.
+Existing local-only/no-telemetry contracts require an explicit owner decision.
+
+The toolkit distributes instructions, not a production dependency or account
+provisioner. It does not install Sentry, enable data collection, add a global
+DSN or make Sentry MCP mandatory. Each application owns its SDK configuration,
+privacy tests, release setup and readiness evidence. See [Sentry setup and
+acceptance gates](docs/sentry-setup.md). Run `agent-toolkit update` to receive
+the standard in an existing project.
 
 ## Discovery contract
 
