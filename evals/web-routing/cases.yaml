@@ -1,4 +1,6 @@
 should_trigger:
+  - prompt: "Use the browser to reproduce the broken signup flow on localhost, inspect network errors, and verify the fix."
+    expected: [playwright-cli]
   - prompt: "Review my uncommitted code changes for bugs, security issues, and missing tests before merge."
     expected: [implementation-review]
   - prompt: "Zaprojektuj nowy panel klienta; najpierw ustalmy cel i zakres."
@@ -20,6 +22,8 @@ should_trigger:
   - prompt: "Sprawdź testami mutacyjnymi, czy testy modułu płatności naprawdę łapią błędy."
     expected: [mutation-testing]
 should_not_trigger:
+  - prompt: "Write a unit test for a pure Python scoring function; no browser or UI is involved."
+    excluded: [playwright-cli]
   - prompt: "Popraw literówkę w zdaniu na stronie głównej."
     excluded: [brainstorming, writing-plans, ux-ui-challenger]
   - prompt: "Zmień odcień tła przycisku zgodnie z istniejącym tokenem koloru."

@@ -1,4 +1,4 @@
-# agent-toolkit v1.10
+# agent-toolkit v1.11
 
 Small, versioned standards and vendored skills for Cursor, Codex and Claude Code. A project's `.agent/manifest.yaml` declares desired state; `.agent/lock.yaml` records the installed toolkit version and SHA-256 of each vendored skill file. Both profiles include [Archify](https://github.com/tt-a1i/archify) for validated interactive architecture diagrams.
 
@@ -39,6 +39,37 @@ my-project/
 ```
 
 `install` changes the standard only between `<!-- agent-toolkit:standard v1 start -->` and `<!-- agent-toolkit:standard end -->`. It preserves text outside that block, including project rules. Claude's `CLAUDE.md` similarly gets a managed `@AGENTS.md` import while retaining local text. Skills are ordinary files, not symlinks. The package owns the selected skill directories; keep project-specific skills outside those names. When you deselect a previously locked skill or Claude, `install` removes its managed runtime copies.
+
+## Optional browser automation
+
+Add `playwright-cli` to `.agent/manifest.yaml` and run `agent-toolkit update` to
+make Microsoft's browser-automation skill available to the selected clients.
+It is opt-in for both profiles. Its complete reference bundle and Apache-2.0
+license are vendored from `microsoft/playwright-cli` v0.1.23; `SOURCE.json`
+records the pinned revision and upstream blob hashes. Keep this third-party
+bundle under packaged data, like Archify, rather than editing it as a first-party
+skill.
+
+The toolkit copies instructions; it does not install Node, the CLI, or browser
+binaries. Prefer an already available, compatible project-local Playwright.
+For a separate workstation runtime, install it explicitly with Node.js 20+:
+
+```sh
+npm install -g @playwright/cli@0.1.23
+playwright-cli --help
+```
+
+Browser initialization and downloads are separate operator actions. Do not run
+the upstream skill installer over toolkit-managed copies; update the vendored
+bundle and its provenance together when upgrading.
+
+Use it to reproduce browser bugs, check changed user journeys and collect
+console/network, screenshot or trace evidence. Keep the existing risk-based test
+strategy: an agent's interactive CLI session does not replace repeatable project
+tests or CI. Use isolated test sessions and synthetic data on local/staging;
+preserve explicit authorization for real external effects. Keep authentication
+state and sensitive screenshots out of Git and shared evidence. Native Android,
+real device audio and telephony require their own checks.
 
 ## Shared rules, skills, and MCP
 
