@@ -1,0 +1,90 @@
+# Manual behavior evals: run each case in a fresh chat with the installed plan-review.
+# Supply only id and artifact contents; withhold expected until scoring the actual review.
+# All artifacts are synthetic; outcomes authorize no production actions.
+cases:
+- id: missing-card-cache-claim
+  frame.md: 'An owner reports: after saving a flashcard I do not see it in the Due list. They suspect
+    stale cache and request invalidation after save. Expected behavior source: product.md says Due lists
+    only cards whose due_at <= now; future cards belong in All. The owner asks for a quick fix before
+    a demo.'
+  research.md: 'Trace T1: POST /cards returns 201 with id=card-17 and due_at tomorrow. Trace T2: a fresh
+    GET /cards returns card-17 with the same due_at. Code C1: Due view filters cards using due_at <= now.
+    No cache experiment has been performed. The support note labels stale cache as the likely root cause.
+    Test tooling T0: package.json defines test (Vitest run) and build (Vite build), with all dependencies
+    already available; tests mock remote integrations.'
+  decisions.md: 'Proposed: invalidate the cards query on save. Do not change API or intended Due filtering.'
+  plan.md: 'Add invalidateQueries after POST /cards. Test that invalidation is called after save and the
+    list refetches. Manual check: save a card and look for it in Due. Automated: frontend tests and build.
+    No production writes. Please review before implementation. Automated verification commands: npm test
+    -- --run and npm run build. Manual checks use local synthetic cards or notes only.'
+  expected:
+    outcome: revise
+    reason: A future card is intentionally filtered; refetch does not address this observation.
+    must_preserve:
+    - Due filtering
+    - evidence versus hypothesis
+    - observable behavior assertions
+- id: unclear-access-policy
+  frame.md: An authenticated approved user cannot open another user's private note. A support request
+    calls the 403 a bug and proposes removing the owner_id filter. The intended sharing/access rule is
+    not documented in the provided material.
+  research.md: 'HTTP trace T1: GET /notes/other-users-note returns 403. Code C1: repository selects notes
+    with owner_id=current_user.id. There is no approved sharing requirement, and no evidence about the
+    intended access policy. Test tooling T0: package.json defines test (Vitest run) and build (Vite build),
+    with all dependencies already available; tests mock remote integrations.'
+  decisions.md: 'Proposal: remove owner_id filtering for authenticated users so the reported URL works.'
+  plan.md: 'Remove the filter. Test authenticated user gets 200 for the supplied note id. Run unit tests;
+    manual work: none. No implementation yet. Automated verification commands: npm test -- --run and npm
+    run build. Manual checks use local synthetic cards or notes only.'
+  expected:
+    outcome: revise
+    reason: Establish the intended access policy before approving a change to private-note access.
+    must_preserve:
+    - owner clarification
+    - no invented authorization rule
+- id: verified-stale-list
+  frame.md: 'Product P1: newly saved due-now cards appear in Due immediately without a reload. Actual:
+    after save, card is absent until reload. Preserve future-card filtering and per-user access.'
+  research.md: 'R1: POST returns 201 due_at=now. R2: a fresh GET includes the same card. R3: the card
+    passes the Due predicate. R4: the UI keeps an older cached query and dispatches no GET after successful
+    save; reload renders the card. Code C1: mutation onSuccess does not invalidate the cards query. These
+    checks rule out persistence, read projection and intentional filtering for this reproduction. Test
+    tooling T0: package.json defines test (Vitest run) and build (Vite build), with all dependencies already
+    available; tests mock remote integrations.'
+  decisions.md: Invalidate only the current user's cards query after successful save. Preserve the current
+    error path and the Due predicate.
+  plan.md: 'Add a regression at the UI/query boundary: load Due, save a due-now card, observe it without
+    reload. It fails on the old behavior and should pass after invalidation. Also keep future cards out
+    of Due and do not invalidate on failed save; retain existing user-isolation coverage. Run frontend
+    tests and build against mocks. Manual: local browser with synthetic cards. No production changes.
+    Automated verification commands: npm test -- --run and npm run build. Manual checks use local synthetic
+    cards or notes only.'
+  expected:
+    outcome: approve
+    reason: Supported causal chain, bounded remedy and regression checks; do not demand unrelated investigation.
+    must_preserve:
+    - future-card exclusion
+    - failed-save behavior
+    - user isolation
+- id: diagnosis-only
+  frame.md: Some users report duplicate task creation after a slow request. Retry timing is suspected
+    but unverified. Product P1 says one accepted submission must create one task.
+  research.md: 'Only a sanitized report is available. Unknown whether the browser submits twice, the server
+    retries, or the UI renders one task twice. Logs and request identifiers have not yet been examined.
+    Test tooling T0: package.json defines test (Vitest run) and build (Vite build), with all dependencies
+    already available; tests mock remote integrations.'
+  decisions.md: Collect evidence before choosing a fix; do not add a debounce or change retry policy yet.
+  plan.md: 'Read existing sanitized staging request events and correlate request ids with stored task
+    ids; reproduce with synthetic tasks in local tests. Distinguish duplicate writes from duplicate rendering
+    and record alternatives. No production writes, new tools, telemetry installation, credentials or behavior
+    change. Deliver research findings and a revised fix plan for another review. Automated verification:
+    npm test -- --run and npm run build. Manual evidence: correlate existing sanitized staging events
+    by request id and inspect persisted task ids through the already authorized read-only view; use synthetic
+    tasks only for local reproduction.'
+  expected:
+    outcome: approve diagnostic scope only
+    reason: Evidence collection is bounded; no speculative remedy is approved.
+    must_preserve:
+    - no production writes
+    - no new telemetry or credentials
+    - subsequent review of the fix
