@@ -349,3 +349,26 @@ def test_new_gitleaks_config_extends_default_rules(tmp_path: Path):
     install(tmp_path)
     assert (tmp_path / ".gitleaks.toml").read_text().startswith("[extend]\nuseDefault = true\n")
 
+def test_generated_lock_exception_requires_hash_and_path():
+    import tomllib
+    from agent_toolkit.adapters.gitleaks import with_allowlist
+
+    config = tomllib.loads(with_allowlist(""))
+    assert config["extend"]["useDefault"] is True
+    assert "allowlists" not in config
+    rule = config["rules"][0]
+    assert rule["id"] == "generic-api-key"
+    allowlist = rule["allowlists"][0]
+    assert allowlist["condition"] == "AND"
+    assert allowlist["regexTarget"] == "secret"
+    assert allowlist["regexes"] == [r"^[a-f0-9]{64}$"]
+    assert allowlist["paths"] == [r"^\.agent/lock\.yaml$"]
+
+
+def test_existing_generic_rule_override_reports_conflict():
+    import pytest
+    from agent_toolkit.adapters.gitleaks import GitleaksConfigError, with_allowlist
+
+    content = '[extend]\nuseDefault = true\n[[rules]]\nid = "generic-api-key"\n'
+    with pytest.raises(GitleaksConfigError, match="Project overrides generic-api-key"):
+        with_allowlist(content)
